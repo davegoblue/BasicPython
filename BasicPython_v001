@@ -1,0 +1,49 @@
+## Blocks of code need the same formatting
+## The : is the key symbol for shifting blocks
+
+## So, the below will print one message if x>20, another if 10 < x <= 20, and nothing if x <= 10
+x=20
+if x > 20:
+    print "Larger"
+elif x > 10:
+    print "Sort of Large"
+
+## The while loop is similar to other languages also
+## This will print 5 4 3 2 1 Blastoff
+x = 5
+print "\n" ## Inserts a newline
+while x > 0 :
+    print x
+    x = x - 1 ## iterate
+print "Blastoff!"
+
+## Variable naming - must start with letters or underscores (though underscore usually reserved for libraries)
+## Case sensitive
+## Not too many reserved words
+
+## Numeric expressions
+print 3**4 ## ** is power
+print 7 % 3 ## % is remainder
+print 7 // 3 ## // is for quotient in both 2.x and 3.x
+print 7 / 3 ## / is for quotient in 2.x IFF everything is an integer
+print 7 / 3.0, 7.0 / 3 ## / is for division in 2.x if anything is a float
+x = 7
+print x / 3 ## x and 3 are both integers, so will be 2 (quotient)
+print float(x) / 3 ## Forcing the float makes this true division
+
+## The + operator has multiple functions -- add numbers, concatenate strings
+print 2 + 3
+print "abc" + "def" ## The + operator functions like paste0
+print "abc", "def" ## This is more like paste, with a space in between
+
+## Conversions are options -- both will coerce if possible
+print float(7) ## Is now 7.0
+print float("7.03") ## OK
+print int(7.000) ## Is now 7
+print int("73") ## OK
+
+## User input is called by raw_input("<insert message>") -- is always a string
+myInput = raw_input("What floor?")
+## print myInput + 1 will fail since they cannot be added
+print int(myInput) + 1 ## Fine, provided myInput can be converted
+print float(myInput) / 3

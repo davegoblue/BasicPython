@@ -1,3 +1,5 @@
+# Summary of Chapters 1-5
+#
 # Blocks of code need the same formatting
 # The : is the key symbol for shifting blocks
 
@@ -147,3 +149,35 @@ myText1 = raw_input("Tell me what is first")
 myText2 = raw_input("Tell me what is second")
 print fakeFunction(myText1, myText2)
 
+# Chapter 5: Loops and Iterations
+# while <condition>: and for a in <list>: are two common iterations
+# while condition:
+#     indent4spaces
+#     break # leaves loop entirely
+#     continue # goes to next aspect of loop
+#
+# for a in b:
+#     indent4spaces
+# back_to_normal
+#
+# None is a special variable, typically checked as is None and is not None
+# The call to "is" checks whether something has the same type AND value - no coercion
+# Typically used for None, True, False, etc. -- if a is True rather than if a == True
+#
+
+myString = "This is a simple text string to evaluate"
+myList = myString.strip().split()
+
+# Set an iteration variable and use while
+intCtr = 0
+while intCtr < len(myList):
+    print myList[intCtr]
+    intCtr = intCtr + 1
+
+# Call it directly using for
+for eachWord in myList:
+    print eachWord
+
+# Example of is
+myBool = 2 < 4
+print myBool==True, myBool is True

@@ -1,49 +1,149 @@
-## Blocks of code need the same formatting
-## The : is the key symbol for shifting blocks
+# Blocks of code need the same formatting
+# The : is the key symbol for shifting blocks
 
-## So, the below will print one message if x>20, another if 10 < x <= 20, and nothing if x <= 10
-x=20
+# So, the below will print one message if x > 20, another if 10 < x <= 20, and nothing if x <= 10
+x = 20
 if x > 20:
     print "Larger"
 elif x > 10:
     print "Sort of Large"
 
-## The while loop is similar to other languages also
-## This will print 5 4 3 2 1 Blastoff
+# The while loop is similar to other languages also
+# This will print 5 4 3 2 1 Blastoff
 x = 5
-print "\n" ## Inserts a newline
-while x > 0 :
+print "\n"  # Inserts a newline
+while x > 0:
     print x
-    x = x - 1 ## iterate
+    x = x - 1  # iterate
 print "Blastoff!"
 
-## Variable naming - must start with letters or underscores (though underscore usually reserved for libraries)
-## Case sensitive
-## Not too many reserved words
+# Variable naming - must start with letters or underscores (though underscore usually reserved for libraries)
+# Case sensitive
+# Not too many reserved words
 
-## Numeric expressions
-print 3**4 ## ** is power
-print 7 % 3 ## % is remainder
-print 7 // 3 ## // is for quotient in both 2.x and 3.x
-print 7 / 3 ## / is for quotient in 2.x IFF everything is an integer
-print 7 / 3.0, 7.0 / 3 ## / is for division in 2.x if anything is a float
+# Numeric expressions
+print 3**4  # ** is power
+print 7 % 3  # % is remainder
+print 7 // 3  # // is for quotient in both 2.x and 3.x
+print 7 / 3  # / is for quotient in 2.x IFF everything is an integer
+print 7 / 3.0, 7.0 / 3  # / is for division in 2.x if anything is a float
 x = 7
-print x / 3 ## x and 3 are both integers, so will be 2 (quotient)
-print float(x) / 3 ## Forcing the float makes this true division
+print x / 3  # x and 3 are both integers, so will be 2 (quotient)
+print float(x) / 3  # Forcing the float makes this true division
 
-## The + operator has multiple functions -- add numbers, concatenate strings
+# The + operator has multiple functions -- add numbers, concatenate strings
 print 2 + 3
-print "abc" + "def" ## The + operator functions like paste0
-print "abc", "def" ## This is more like paste, with a space in between
+print "abc" + "def"  # The + operator functions like paste0
+print "abc", "def"  # This is more like paste, with a space in between
 
-## Conversions are options -- both will coerce if possible
-print float(7) ## Is now 7.0
-print float("7.03") ## OK
-print int(7.000) ## Is now 7
-print int("73") ## OK
+# Conversions are options -- both will coerce if possible
+print float(7)  # Is now 7.0
+print float("7.03")  # OK
+print int(7.000)  # Is now 7
+print int("73")  # OK
 
-## User input is called by raw_input("<insert message>") -- is always a string
+# User input is called by raw_input("<insert message>") -- is always a string
 myInput = raw_input("What floor?")
-## print myInput + 1 will fail since they cannot be added
-print int(myInput) + 1 ## Fine, provided myInput can be converted
+# print myInput + 1 will fail since they cannot be added
+print int(myInput) + 1  # Fine, provided myInput can be converted
 print float(myInput) / 3
+
+# Chapter 3 - Conditional Statements
+# if condition:
+#     indent4spaces
+#     indent4spaces
+# elif nextcondition:
+#     indent4spaces
+#     indent4spaces
+# else:
+#     indent4spaces
+# more_stuff # loop has ended
+#
+# Booleans are normal: < ; <= ; >= ; >
+# Test for equality: == ; !=
+# Test for precise similarity: is ; is not
+#
+# Exception handling and guardians
+# try:
+#     indent4spaces
+#     indent4spaces
+# except:
+#     indent4spaces # only run if the try errors out
+# more_stuff # loop has ended
+#
+# Guardians are the concepts that if evaluate left to right and stop ASAP
+# if a and b and c: # this will stop if a is False
+# This can be especially useful for errors related to out-of-index, divide by 0, etc.
+# if a>0 and b/a > 2: # This is an example of the guardian; if a==0, the b/a is never tested
+# if len(a)>=2 and a[1]=="From:" # This is another example of the guardian; if a[1] is out-of-range, then len(a) < 2
+
+myNum = raw_input("Enter a number")
+try:
+    myNum = float(myNum)
+except:
+    print "A number means a number, exiting!"
+    quit()
+
+if myNum > 20:
+    print "Big number"
+elif myNum > 10:
+    print "Medium number"
+elif myNum > 0:
+    print "Small positive number"
+else:
+    print "Non-positive number"
+
+print "Your number mod 7 has quotient", myNum//7, "with remainder", myNum%7
+
+# Chapter 4: Functions
+# Many pre-defined functions - max(), min(), len(), float(), int(), str(), type()
+#
+# import random # brings in the random capabilities
+# x=random.random() # between 0 and 1
+# x=random.randint(5,10) # random integer between 5 and 10
+# t = [1, 2, 3]
+# random.choice(t) # picks an element from t at random
+#
+# import math
+# x = math.log10(100) # 2
+# x = math.sin(0.7)
+# math.pi # 3.14159...
+# math.sqrt() # square root
+#
+# User-defined functions
+# def myFunction(optional_args):
+#     indent4spaces
+#     indent4spaces
+#     return myKeyReturn # note that a return exits the function straight away
+
+import random
+print random.random(), random.random(), random.random()
+print random.randint(0, 1), random.randint(0, 1), random.randint(0, 1)
+t = ["a", "b", "c", "d"]
+type(t)
+print random.choice(t), random.choice(t), random.choice(t)
+
+import math
+print math.log10(100)
+print math.pi
+print math.sin(math.pi / 2), math.cos(math.pi/2)
+
+
+def fakeFunction(myArg1, myArg2):
+    if myArg1=="":
+        return False
+    try:
+        myFloat=float(myArg2)
+    except:
+        print "Must pass something coercible to float in myArg2, exiting"
+        quit()
+    if myFloat >= 0 and myFloat <= math.pi:
+        return math.sin(myFloat)
+    else:
+        return math.cos(myFloat % math.pi)
+
+
+myText1 = raw_input("Tell me what is first")
+myText2 = raw_input("Tell me what is second")
+print fakeFunction(myText1, myText2)
+

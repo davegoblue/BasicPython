@@ -60,3 +60,33 @@ print fruit.rjust(4,"*")  # banana (note that since the requested width is less 
 
 
 # Chapter 7 - Files
+# Python in general has an open() which returns a handle
+# The handle can either be passed to .read() or used as for lines in handle:
+# Our file happens to be located in ..\UMWeek07\mbox-short.txt
+
+fhandShort = open("..\UMWeek07\mbox-short.txt")
+
+# Method 1 (pulls everything to memory)
+inpShort = fhandShort.read()
+print len(inpShort)
+print inpShort[:100]
+
+# Method 2 (line by line reading)
+fhandShort = open("..\UMWeek07\mbox-short.txt")
+for eachLine in fhandShort:
+    if eachLine.startswith("From:"): print eachLine.strip()
+
+# Files can be written out in a similar manner
+# The "w" or "wb" is passed to the open() command
+# Then, the .write() is used
+
+fhandOut = open("dummyOut.txt", "w")
+line1 = "This here's the wattle,\n"
+line2 = "the emblem of our land.\n"
+fhandOut.write(line1)
+fhandOut.write(line2)  # Default is append
+fhandOut.close()
+
+# The repr() will print out the white-space, which can be useful for debugging
+print line1
+print repr(line1)

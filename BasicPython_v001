@@ -95,7 +95,7 @@ elif myNum > 0:
 else:
     print "Non-positive number"
 
-print "Your number mod 7 has quotient", myNum//7, "with remainder", myNum%7
+print "Your number mod 7 has quotient", myNum // 7, "with remainder", myNum % 7
 
 # Chapter 4: Functions
 # Many pre-defined functions - max(), min(), len(), float(), int(), str(), type()
@@ -128,14 +128,14 @@ print random.choice(t), random.choice(t), random.choice(t)
 import math
 print math.log10(100)
 print math.pi
-print math.sin(math.pi / 2), math.cos(math.pi/2)
+print math.sin(math.pi / 2), math.cos(math.pi / 2)
 
 
 def fakeFunction(myArg1, myArg2):
-    if myArg1=="":
+    if myArg1 == "":
         return False
     try:
-        myFloat=float(myArg2)
+        myFloat = float(myArg2)
     except:
         print "Must pass something coercible to float in myArg2, exiting"
         quit()
@@ -180,4 +180,4 @@ for eachWord in myList:
 
 # Example of is
 myBool = 2 < 4
-print myBool==True, myBool is True
+print myBool == True, myBool is True

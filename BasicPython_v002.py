@@ -82,11 +82,132 @@ for eachLine in fhandShort:
 
 fhandOut = open("dummyOut.txt", "w")
 line1 = "This here's the wattle,\n"
-line2 = "the emblem of our land.\n"
+line2 = "the emblem\t:\tof our land.\n"
 fhandOut.write(line1)
 fhandOut.write(line2)  # Default is append
 fhandOut.close()
 
-# The repr() will print out the white-space, which can be useful for debugging
-print line1
-print repr(line1)
+# The repr() will print out the tabs and newlines, which can be useful for debugging
+print line1, line2
+print repr(line1), repr(line2)
+
+# Chapter 8 - Lists
+# Lists are sequences of values (of any or even mixed types), denoted with []
+# Lists have the same indexing as strings, and are mutable
+# The range(n) operator creates an index from 0 to n-1, helpful for traversing lists
+
+myList = ["spam", 2.0, 5, [10,20]]
+print len(myList)
+for ctr in range(len(myList)):
+    print ctr, type(myList[ctr]), myList[ctr]
+myList[1] = 2.0 * myList[2]
+print myList
+
+print 10 in myList, 10.0 in myList # True True
+
+emptyList = []
+for x in emptyList: print "Never got here!"
+emptyList = list()
+for x in emptyList: print "Still never got here!"
+emptyList = [[]]
+for x in emptyList: print "But I did get here!", x
+
+# List concatenation is done with +, while * means repeat
+listA = [1, 2]
+listB = [3, 4]
+print listA + listB, listA * 3  # [1, 2, 3, 4] [1, 2, 1, 2, 1, 2]
+print (listA + listB)[1:3]  # [2, 3]
+
+# There are multiple ways to delete an element from a list
+#
+saveList = myList[:]  # Avoids aliasing
+tempList = myList  # Aliasing, dangerous!
+print tempList, saveList  # ['spam', 10.0, 5, [10, 20]] ['spam', 10.0, 5, [10, 20]]
+print tempList is myList, saveList is myList  # True False
+
+# .pop(n) will delete item n and return it to the console
+x = tempList.pop(2)
+print x, tempList
+print myList  # Oopsies!
+
+myList = saveList[:]
+print myList
+x = saveList.pop(2)
+print x, saveList
+print myList  # Much better
+
+# del list(n) will delete item n from the list, without popping
+saveList = myList[:]  # Avoids aliasing
+del saveList[1]
+print saveList, myList
+
+# .remove(value) will remove the first item that matches value
+saveList = myList[:]  # Avoids aliasing
+saveList.remove(5)  # Will only remove the first 5 in the list
+print saveList, myList
+
+# Lists use len, max, min, sum
+print len(myList), max(myList), min(myList), sum(myList[1:3])  # 4 spam 5 15.0
+
+# Lists can be used to convert character strings
+myString = "Bananas are sometimes tasty"
+print list(myString)
+print myString.split(" ")  # ["Bananas", "are", "sometimes", "tasty"]
+x = "_"
+print x.join(myString.split(" "))  # "Bananas_are_sometimes_tasty"
+
+# Can use .strip() to get rid of whitespace, .startswith() to grep key lines, and .split() to make a list
+fhand = open("..\UMWeek07\mbox-short.txt")
+for eachLine in fhand:
+    eachLine = eachLine.strip()
+    if not eachLine.startswith("From "): continue
+    myWords = eachLine.split()
+    if len(myWords) > 2: print myWords[2]
+
+# Reminder on aliasing
+print "***\t***\n\n"
+a = "bananas"
+b = "bananas"
+print a is b  # True (sort of OK since these are immutable)
+a = a + " are sometimes tasty"
+print a, b, a is b  # Works out OK
+
+a = [1, 2, 3]
+b = [1, 2, 3]
+print a is b  # False (lists do not alias even if like this
+a = b
+print a is b, a, b  # True (this could cause problems
+a = b[:]
+print a is b, a, b  # False
+
+# The textbook is rather understated in calling this behavior "highly error prone"
+
+
+# Note that most list operations return None
+t1 = [1, 2]
+t2 = t1.append(3)
+print t1, t2  # [1, 2, 3] None
+
+t1 = [1, 2]
+t2 = t1 + [3]
+print t1, t2  # [1, 2] [1, 2, 3]
+
+
+# Similar behavior in functions
+def tail(t): return t[1:]
+letters = ["a", "b", "c"]
+tail(letters)
+print letters  # ["a", "b", "c"]
+rest = tail(letters)
+print rest, letters  # ["a", "b"] ["a", "b", "c"]
+letters = tail(letters)
+print letters  # ["b", "c"]
+
+
+# Use of the range() command - all arguments must be integers
+print range(5)  # [0, 1, 2, 3, 4]
+print range(1, 5)   # [1, 2, 3, 4]
+print range(1, 5, 2)  # [1, 3]
+
+
+# Chapter 9 - Dictionaries

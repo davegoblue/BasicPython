@@ -211,3 +211,78 @@ print range(1, 5, 2)  # [1, 3]
 
 
 # Chapter 9 - Dictionaries
+# A dictionary is a type of associative array - mapping of key-value pairs (items)
+# Items can be created on the fly, which can be quite helpful
+# The dictionary can either be called with dict() or set using {"key1":"value1", "key2":"value2"}
+# There is no real meaning to the order of the items in the dictionary - do not count on predictable/logical order
+eng2sp=dict()
+print eng2sp  # {}
+eng2sp["one"] = "uno"
+eng2sp["two"] = "dos"
+eng2sp["three"] = "tres"
+print eng2sp  #  {'three': 'tres', 'two': 'dos', 'one': 'uno'}
+print eng2sp["two"], len(eng2sp), type(eng2sp)  # "dos" 3 <type 'dict'>
+
+# The in operator lets you check the keys, while .values() gives a list of the values
+print "one" in eng2sp, "four" in eng2sp, "tres" in eng2sp  # True False False
+print "one" in eng2sp.values(), "tres" in eng2sp.values()  # False True
+
+# The .get() is a pretty nice way to simplify coding for dictionaries
+myWord = "Brontosaurus"
+
+# Typical method using if/else
+d1 = dict()
+for eachChar in myWord.lower():
+    if eachChar not in d1:
+        d1[eachChar] = 1
+    else:
+        d1[eachChar] = d1[eachChar] + 1
+print d1
+
+# Refined method using .get()
+d2 = dict()
+for eachChar in myWord.lower():
+    d2[eachChar] = d2.get(eachChar, 0) + 1  # The second argument to .get() is what comes back for a no-match
+print d2
+
+print d1==d2, d1 is d2  # True False
+
+# For loops iterate through dictionary *keys*
+for eachItem in d1:
+    print eachItem, d1[eachItem]
+
+# Or, if you want to sort by eachItem
+d1List = d1.keys()
+d1List.sort()
+for eachItem in d1List:
+    print eachItem, d1[eachItem]
+
+# Stripping puctuation can be helpful - can use .translate(None, deleteList)
+import string
+print string.punctuation  # !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~
+myLine = "**This, I must say, eh?  Punctuation, overdone, is unpleasant! :-)"
+print myLine.split()
+# ['**This,', 'I', 'must', 'say,', 'eh?', 'Punctuation,', 'overdone,', 'is', 'unpleasant!', ':-)']
+print myLine.translate(None, string.punctuation).split()
+# ['This', 'I', 'must', 'say', 'eh', 'Punctuation', 'overdone', 'is', 'unpleasant']
+
+# Example assignment code
+fileName = "..\UMWeek07\mbox-short.txt"
+handle = open(fileName)
+nameCount = dict()
+
+for eachLine in handle:
+    if not eachLine.strip().startswith("From "):
+        continue
+    msgSender = eachLine.strip().split()[1]
+    nameCount[msgSender] = nameCount.get(msgSender,0) + 1
+
+maxSender = ""
+maxCount = 0
+
+for msgSender, ctSender in nameCount.items():
+    if ctSender > maxCount:
+        maxCount = ctSender
+        maxSender = msgSender
+
+print maxSender, maxCount

@@ -44,7 +44,7 @@ print myProblem.strip().lower().startswith("H")  # False (has been converted to 
 print myProblem.strip().lower().endswith("g")  # True
 
 # There is also a rather handy formatting operator, with %d as integer, %g as float, %s as string
-print "In %g years, I have spotted %d %s" % (3.5, 42, "camels")  ## In 3.5 years, I have spotted 42 camels"
+print "In %g years, I have spotted %d %s" % (3.5, 42, "camels")  # In 3.5 years, I have spotted 42 camels"
 
 # Some additional useful string functions
 # str.replace(old, new, count=NULL) - replace old with new, maximum of count times
@@ -55,8 +55,8 @@ print "In %g years, I have spotted %d %s" % (3.5, 42, "camels")  ## In 3.5 years
 
 print fruit.replace("a", "A"), fruit.replace("a", "A", 2)  # bAnAnA bAnAna
 print fruit.rfind("a"), fruit.rfind("c")  # 5 -1
-print fruit.rjust(8,"*"), fruit.center(8,"*"), fruit.ljust(8,"*")  # **banana *banana* banana**
-print fruit.rjust(4,"*")  # banana (note that since the requested width is less than banana, it gives back banana
+print fruit.rjust(8, "*"), fruit.center(8, "*"), fruit.ljust(8, "*")  # **banana *banana* banana**
+print fruit.rjust(4, "*")  # banana (note that since the requested width is less than banana, it gives back banana
 
 
 # Chapter 7 - Files
@@ -96,21 +96,21 @@ print repr(line1), repr(line2)
 # Lists have the same indexing as strings, and are mutable
 # The range(n) operator creates an index from 0 to n-1, helpful for traversing lists
 
-myList = ["spam", 2.0, 5, [10,20]]
+myList = ["spam", 2.0, 5, [10, 20]]
 print len(myList)
 for ctr in range(len(myList)):
     print ctr, type(myList[ctr]), myList[ctr]
 myList[1] = 2.0 * myList[2]
 print myList
 
-print 10 in myList, 10.0 in myList # True True
+print 10 in myList, 10.0 in myList  # True True
 
 emptyList = []
 for x in emptyList: print "Never got here!"
 emptyList = list()
-for x in emptyList: print "Still never got here!"
+for y in emptyList: print "Still never got here!"
 emptyList = [[]]
-for x in emptyList: print "But I did get here!", x
+for z in emptyList: print "But I did get here!", z
 
 # List concatenation is done with +, while * means repeat
 listA = [1, 2]
@@ -126,14 +126,14 @@ print tempList, saveList  # ['spam', 10.0, 5, [10, 20]] ['spam', 10.0, 5, [10, 2
 print tempList is myList, saveList is myList  # True False
 
 # .pop(n) will delete item n and return it to the console
-x = tempList.pop(2)
-print x, tempList
+xPop = tempList.pop(2)
+print xPop, tempList
 print myList  # Oopsies!
 
 myList = saveList[:]
 print myList
-x = saveList.pop(2)
-print x, saveList
+xPop = saveList.pop(2)
+print xPop, saveList
 print myList  # Much better
 
 # del list(n) will delete item n from the list, without popping
@@ -153,8 +153,8 @@ print len(myList), max(myList), min(myList), sum(myList[1:3])  # 4 spam 5 15.0
 myString = "Bananas are sometimes tasty"
 print list(myString)
 print myString.split(" ")  # ["Bananas", "are", "sometimes", "tasty"]
-x = "_"
-print x.join(myString.split(" "))  # "Bananas_are_sometimes_tasty"
+xUS = "_"
+print xUS.join(myString.split(" "))  # "Bananas_are_sometimes_tasty"
 
 # Can use .strip() to get rid of whitespace, .startswith() to grep key lines, and .split() to make a list
 fhand = open("..\UMWeek07\mbox-short.txt")
@@ -215,12 +215,12 @@ print range(1, 5, 2)  # [1, 3]
 # Items can be created on the fly, which can be quite helpful
 # The dictionary can either be called with dict() or set using {"key1":"value1", "key2":"value2"}
 # There is no real meaning to the order of the items in the dictionary - do not count on predictable/logical order
-eng2sp=dict()
+eng2sp = dict()
 print eng2sp  # {}
 eng2sp["one"] = "uno"
 eng2sp["two"] = "dos"
 eng2sp["three"] = "tres"
-print eng2sp  #  {'three': 'tres', 'two': 'dos', 'one': 'uno'}
+print eng2sp  # {'three': 'tres', 'two': 'dos', 'one': 'uno'}
 print eng2sp["two"], len(eng2sp), type(eng2sp)  # "dos" 3 <type 'dict'>
 
 # The in operator lets you check the keys, while .values() gives a list of the values
@@ -245,7 +245,7 @@ for eachChar in myWord.lower():
     d2[eachChar] = d2.get(eachChar, 0) + 1  # The second argument to .get() is what comes back for a no-match
 print d2
 
-print d1==d2, d1 is d2  # True False
+print d1 == d2, d1 is d2  # True False
 
 # For loops iterate through dictionary *keys*
 for eachItem in d1:
@@ -275,7 +275,7 @@ for eachLine in handle:
     if not eachLine.strip().startswith("From "):
         continue
     msgSender = eachLine.strip().split()[1]
-    nameCount[msgSender] = nameCount.get(msgSender,0) + 1
+    nameCount[msgSender] = nameCount.get(msgSender, 0) + 1
 
 maxSender = ""
 maxCount = 0
@@ -286,3 +286,68 @@ for msgSender, ctSender in nameCount.items():
         maxSender = msgSender
 
 print maxSender, maxCount
+
+
+# Chapter 10 - Tuples
+# Tuples are immutable, hashable, and comparable (can be sorted, good for dictionaries)
+# Stylistically, RHS tuples are typically surrounded by () though this is unnecessary
+# A single element must have the comma - ("a") is a string, while ("a", ) is a len 1 tuple
+
+myTuple = ("awesome")
+print myTuple, type(myTuple), len(myTuple)  # awesome <type 'str'> 7
+myTuple = ("awesome",)
+print myTuple, type(myTuple), len(myTuple)  # ('awesome') <type 'tuple'> 1
+
+# The call to tuple() makes a blank tuple
+# The call to tuple(string) takes each letter of the string and makes it a tuple
+myTuple = tuple()
+print myTuple, type(myTuple), len(myTuple)  # () <type 'tuple'> 0
+myTuple = tuple("awesome")
+print myTuple, type(myTuple), len(myTuple)  # ("a", "w", "e", "s", "o', "m", "e") <type 'tuple'> 7
+
+# Since tuples are immutable, you need to treat them like strings
+# Note that the "A", format is needed, otherwise you are adding strings and tuples
+myTuple = ("A",) + myTuple[1:]
+print myTuple, type(myTuple), len(myTuple)  # ("A", "w", "e", "s", "o', "m", "e") <type 'tuple'> 7
+
+# A common method is DSU -- Decorate, Sort, Undecorate -- especially useful with dictionaries
+# Tuples can also be used on the LHS, typically without their ()
+m = ["have", "fun"]
+print type(m)  # <type 'list'>
+x, y = m
+print x, y, type(x), type(y)  # "have" "fun" <type 'str'> <type 'str'>
+x, y = y, x  # Swap the variables
+print x, y, type(x), type(y)  # "fun" "have" <type 'str'> <type 'str'>
+
+# Tuples are especially nice for getting words back from the doctionary
+# Reverting back to the eng2sp{} we created previously in this program
+myTupleList = eng2sp.items()  # list of tuples
+myTupleList.sort()  # sorted by key
+print myTupleList, type(myTupleList)  # [('one', 'uno'), ('three', 'tres'), ('two', 'dos')] <type 'list'>
+
+# Can also use to print the dictionary by descending value
+myTupleList = list()
+for key, val in eng2sp.items(): myTupleList.append((val, key))
+myTupleList.sort(reverse=True)
+print myTupleList  # [('uno', 'one'), ('tres', 'three'), ('dos', 'two')]
+
+# Also useful for most common words in a file
+fhand = open("..\UMWeek07\mbox-short.txt")
+myCounts = dict()
+ct = 0
+for line in fhand:
+    strWords = line.translate(None, string.punctuation).lower().split()
+    for eachWord in strWords: myCounts[eachWord] = myCounts.get(eachWord, 0) + 1
+
+myTupleList = list()
+for key, val in myCounts.items(): myTupleList.append((val, key))
+myTupleList.sort(reverse=True)
+for val, key in myTupleList[:5]: print key, val
+
+# There can be sequences of sequences, e.g., the list of tuples
+# Strings are the most limited, and are also immutable
+# Lists tend to be the most common because they are mutable
+# Tuples can be better then lists when 1) sequencing dictionaries, 2) passing arguments to functions,
+# and 3) sending something back from a function by way of return
+# There is no .sort() or .reverse() method for a tuple since they are immutable
+# The sorted() and reversed() built-in functions will work, though you have to save the output

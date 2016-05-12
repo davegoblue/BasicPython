@@ -9,3 +9,4 @@ Beginning Python Commands
 * BasicPython_v002 summarizes Chapter 7
 * BasicPython_v002 summarizes Chapter 8
 * BasicPython_v002 summarizes Chapter 9
+* BasicPython_v002 summarizes Chapter 10

@@ -84,3 +84,99 @@ print re.findall("\$[0-9.]+", myText)  # $10.95 -- command requires $ then serie
 # () ignored for matching purposes, but only what is inside the () is returned
 # \d is equivalent to [0-9]
 # \D is equivalent to [^0-9]
+
+
+# Chapter 12 - Networked programs
+# HTTP is HyperText Transfer Protocol
+# Python has a socket library, allowing the end user to be a basic browser
+import socket
+
+
+# Read in a text file with header
+mysock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+mysock.connect(("www.py4inf.com", 80))
+mysock.send("GET http://www.py4inf.com/code/romeo.txt HTTP/1.0\n\n")
+
+while True:
+    data = mysock.recv(512)
+    if len(data) < 1: break
+    print data
+
+mysock.close()
+
+import socket
+import time
+
+
+# Read in an image file with header
+mysock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+mysock.connect(("www.py4inf.com", 80))
+mysock.send("GET http://www.py4inf.com/cover.jpg HTTP/1.0\n\n")
+count = 0
+picture=""
+
+while True:
+    data=mysock.recv(5120)
+    if len(data) < 1: break
+    time.sleep(0.1)  # Keep the lines all at 5120
+    count = count + len(data)
+    print len(data), count
+    picture = picture + data
+
+mysock.close()
+
+# Grab the header (ends with two straight CRLF)
+pos = picture.find("\r\n\r\n")
+print "Header length", pos
+print picture[:pos]
+
+# Ditch the header and save the picture
+picture = picture[pos+4:]
+fhand = open("stuff.jpg", "wb")
+fhand.write(picture)
+fhand.close()
+
+
+# Alternately, this can all be done much easier with urllib
+import urllib
+
+# Use the urllib library to manage this
+fhand = urllib.urlopen("http://www.py4inf.com/code/romeo.txt")  # consumes headers, returns only data
+for line in fhand: print line.rstrip()
+
+# Alternately, use urllib to get word counts
+counts = dict()
+fhand = urllib.urlopen("http://www.py4inf.com/code/romeo.txt")  # consumes headers, returns only data
+for line in fhand:
+    words = line.split()
+    for word in words: counts[word] = counts.get(word, 0) + 1
+
+print counts
+
+
+# The BeautifulSoup library can also be used to help repair "broken" HTML
+# import urllib
+# from BeautifulSoup import *
+#
+# Use BeautifulSoup to extract the links
+# url = raw_input("\nEnter - ")
+# html = urllib.urlopen(url).read()
+# soup = BeautifulSoup(html)
+# tags = soup("a") # Retrieve anchor tags
+#
+# Print the tag, then extract in more detail
+# for tag in tags:
+#     print "TAG:", tag
+#     print "URL:", tag.get("href", None)
+#     print "Content:", tag.contents[0]
+#    print "Attrs:", tag.attrs
+
+# Can also use regular expressions to scarpe the web - this is essentially what Google does
+import urllib
+import re
+
+# Use regular expressions to scrape for web links
+url = raw_input("\nEnter - ")
+html = urllib.urlopen(url).read()
+links = re.findall('href="(http.*?://.*?)"', html)
+for link in links: print link

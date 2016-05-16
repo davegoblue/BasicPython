@@ -113,10 +113,10 @@ mysock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 mysock.connect(("www.py4inf.com", 80))
 mysock.send("GET http://www.py4inf.com/cover.jpg HTTP/1.0\n\n")
 count = 0
-picture=""
+picture = ""
 
 while True:
-    data=mysock.recv(5120)
+    data = mysock.recv(5120)
     if len(data) < 1: break
     time.sleep(0.1)  # Keep the lines all at 5120
     count = count + len(data)
@@ -176,7 +176,7 @@ import urllib
 import re
 
 # Use regular expressions to scrape for web links
-url = raw_input("\nEnter - ")
+url = raw_input("\nEnter a website to find links on: ")
 html = urllib.urlopen(url).read()
 links = re.findall('href="(http.*?://.*?)"', html)
 for link in links: print link
@@ -232,3 +232,74 @@ for item in lst:
     print "ID", item.find("id").text
     print "Attribute", item.get("x")
 
+
+# Chapter 13 - Part 2 (JSON)
+# JSON is more or less nested Python dictionaries/lists, making it easy to work with
+# JSON tends to be preferred when possible
+# XML is used when self-expression is more vital; e.g., in PPTX, the X stands for XML
+# The "wire protocol" is the standard means of transmitting information among multiple systems
+# Sender serializes data (converts to wire protocol) and receiver de-serializes data (converts to own format)
+# Roy Fielding developed the REST architecture which is highly related to this
+# Computers like ISO 8601 time formats (YYYY-MM-DDTHH:MM:SSZ), where Z is UTC/GMT
+# SOA is Service Oriented Architecture, where our application relies on services (e.g., data) from other applications
+# Benefits of SOA include single source of truth, owner of data setting rules (e.g., API) on usage, etc.
+
+import json
+
+print "\n***\t\t***\n"
+
+inputJSON = '''
+[
+    {   "id":"001",
+        "x":"2",
+        "name":"Chuck"
+    },
+    {
+        "id":"009",
+        "x":"7",
+        "name":"Brent"
+    }
+]'''
+
+info = json.loads(inputJSON)
+print "User Count:", len(info)
+
+for item in info:
+    print "Name", item["name"]
+    print "ID", item["id"]
+    print "Attribute", item["x"]
+
+# Google geocoding example
+import urllib
+import json
+
+serviceurl = "http://maps.googleapis.com/maps/api/geocode/json?"
+while True:
+    address = raw_input("Enter location for geocode: ")
+    if len(address) < 1: break
+    myURL = serviceurl + urllib.urlencode({'sensor': 'false', 'address': address})
+    print "Retrieving", myURL
+
+    uh = urllib.urlopen(myURL)
+    geoData = uh.read()
+    print "Retrieved", len(geoData), "characters"
+
+    try:
+        js = json.loads(str(geoData))
+    except:
+        js = None
+    if 'status' not in js or js['status'] != "OK":
+        print "==== Failure to Retrieve ===="
+        print geoData
+        continue
+
+    print json.dumps(js, indent=4)  # This is a pretty-printer
+
+    lat = js['results'][0]['geometry']['location']['lat']
+    lng = js['results'][0]['geometry']['location']['lng']
+    print "lat:", lat, "lng:", lng
+    location = js['results'][0]['formatted_address']
+    print location
+
+
+# The end

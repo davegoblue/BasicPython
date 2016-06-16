@@ -7,4 +7,4 @@ Beginning Python Commands
 * BasicPython_v003.py summarizes Chapters 11-13
 
 ### Week of 13-JUN-2016
-* BasicPython_v004.py summarizes OOP
+* BasicPython_v004.py summarizes OOP and basic SQL

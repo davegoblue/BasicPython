@@ -56,3 +56,77 @@ myFan = FootballFan()
 myFan.party()  # So far 1
 myFan.touchdown()  # So far 2  points 7
 myFan.party()  # So far 3
+
+# Introduction to Databases
+# DB Browser for SQLite has been downloaded and can run SQL commands
+# Relational Databases are designed for fast data retrieval - linking data
+# Database - contains many tables
+# Relation (or table) - contains tuples and attributes, specifically "set of tuples having the same attribute"
+# Tuple (row) - set of fields representing an object (e.g., person)
+# Attribute (column, field) - one of possibly many elements of data corresponding to the object
+# The first row sometimes contains metadata (structure, schema) about the rest of the table
+#
+# Structured Query Language (SQL) is the language used to access the data - API (contract) between DB and software
+# Create, Retrieve, Update (or Insert), Delete - the CRUD methodology
+# The existence of the API means that SQL can talk to Oracel or MySQL or any other apps
+# SQL is a simple and powerful language that depends on the data being pretty
+# Python is more rough around the edges, but much better with manipulating dirty data
+#
+# Most database projects split the roles of Application Developer and Database Administrator
+# The AD and DBA may build the data model together; only the DBA may typically access/modify the raw data
+# In small projects, the AD and DBA may be the same person!
+# SQLite is an "embedded database" that is so small it can be built in to the software (as it is for Python)
+#
+# Example of using DB Browser for SQLite
+# File - New Database - Execute SQL tab
+# CREATE TABLE Users ( name TEXT(128), email TEXT(128) )
+# Go to the Browser tab and enter your data
+# Chuck	    csev@umich.edu
+# Colleen	vlt@umich.edu
+# Sally	    sally@umich.edu
+# Fred	    fred@umich.edu
+# INSERT INTO Users (name, email) VALUES ("Kristin", "kf@umich.edu") <adds record>
+# DELETE FROM Users WHERE email="fred@umich.edu" <will delete any records - 0 through all - matching query>
+# UPDATE Users SET name="Charles" WHERE email="csev@umich.edu" <will change name everywhere it sees e-mail>
+# SELECT * FROM Users <grab all records>
+# SELECT * FROM Users WHERE email="csev@umich.edu" <just the records matching the e-mail address>
+# SELECT * FROM Users ORDER BY email <sort the data by email>
+
+# Read mbox.txt and count the domain names
+# Commit the database to the .sqlite format
+
+# First, import sqlite3, create SQLite using connect, and create a pointer using curson
+
+import sqlite3
+
+connSQL = sqlite3.connect('_notuse_BP004v001.sqlite')
+myPointer = connSQL.cursor()
+
+# The .execute asks to run a SQL command; can use ''' to open/close and split it over lines in Python
+# Delete any existing table called counts and open a new table Counts
+myPointer.execute('DROP TABLE IF EXISTS Counts')
+myPointer.execute('CREATE TABLE Counts (org TEXT, count INTEGER)')
+
+# Default to reading mbox.txt, but allow flexibility for others
+fname = raw_input('Enter file name: ')
+if ( len(fname) < 1 ) : fname = 'mbox.txt'
+fh = open(fname)
+
+for line in fh:
+    if not line.startswith('From: '):
+        continue
+    domName = line.split()[1].split("@")[1]
+
+    # Find the lines that already match this domain name
+    myPointer.execute('SELECT count FROM Counts WHERE org = ? ', (domName,))
+
+    # The .fetchone() grabs the first matching row from the SQL query; will be None if non-existent
+    # Basically, create the line (INSERT INTO) with count=1, or update (UPDATE) the line to count=count+1
+    if myPointer.fetchone() is None:
+        myPointer.execute('INSERT INTO Counts (org, count) VALUES ( ? , 1 )', (domName,))
+    else:
+        myPointer.execute('UPDATE Counts SET count=count+1 WHERE org = ?', (domName,))
+
+# The .commit() writes to the DB; can put in the for loop (slower/safer) or leave outside
+# Need to have the .commit() somewhere though, to make sure data is written out
+connSQL.commit()

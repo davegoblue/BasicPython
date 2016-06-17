@@ -130,3 +130,202 @@ for line in fh:
 # The .commit() writes to the DB; can put in the for loop (slower/safer) or leave outside
 # Need to have the .commit() somewhere though, to make sure data is written out
 connSQL.commit()
+
+# The .close() closes out the cursor, and the fh.close() closes out the file handle
+myPointer.close()
+fh.close()
+print fh  # <closed file 'mbox.txt', mode 'r' at 0x02352BD0>
+
+
+# Data Models and Relational SQL
+# A data model links various tables together
+# Database design is an art form, with particular skills and experience
+# Goal is to avoid bad mistakes -- build a clean, easily understood database
+# Typically, there will ba a picture showing the relationships among the tables
+# Smart data models will run MUCH faster than having everything in one place
+# The gist is that numbers and indices are vastly faster for look-ups than text
+# One of the basic "rules" is to have only one copy of each "real world thing" in the database
+# For every piece of information, identify whether it is an object, or an attribute of another object
+# 	Where you start is not all that important, though starting in a good place (the most central feature)
+#   often makes the picture better
+#   For example, if you are selling tracks, you probably want the track to be the centerpiece of the system
+#   Suppose that the data is Track - Album - Artist - Genre - Length - Rating - Count
+#       Length, Rating, Count, Genre (because it can be different for the same Album/Artist) are attributes of Track
+#       Album, Artist, are NOT attributes of Track -- they are instead connected to tracks
+#       Tracks would belong to Albums, Albums would belong to Artists
+#   Basically, the exercise is about what "belongs" to who
+#
+# Next, the goal is to map the data model picture in to a data model with tables
+# 	So, we might take the Track table and start with a primary key, ID
+# 		There will also be Title, Rating, Length, and Count
+# 		There will also be Album ID, since we agreed that tracks belong to Albums
+# 	There will then be an Album table with primary key ID and then Title
+# 	Can think of the hierarchy as
+# 		Table (name)
+# 		Primary Key (using ID in this case)
+# 		Logical Key (things about the object that should have a shortcut to them -- likely WHERE or ORDER BY clause)
+# 		Foreign Key (links to ID in other tables)
+#		There are also attributes that do not have any keys -- we do not plan to search/source on them
+# 	Generally, comply with the naming conventions of the organizations that you work with (e.g., "Ruby on Rails")
+# 	Gives an example of using DB Broswer for SQLite to create a new table
+#		The check boxes are for "create field" are "Not Null", "Primary Key", "AutoIncrement", and "Unique"
+# 	Typical approach is to work from outwards in on the diagram
+# 		The foreign keys are set as integers, usually with a reasonable name to say
+#       what foreign table they are linking to
+#
+# Next, the goal is to create the relational data
+# 	The key words in SQL are case independent (interesting), so INSERT INTO can be written Insert Into or insert into
+# 	When an auto-increment is requested, it would just be INSERT INTO Artist (name) VALUES ("Led Zeppelin")
+# 		INSERT INTO Genre (name) VALUES ("Rock")
+# 			Note that we created the table Genre even though it is an attribute of Track;
+#           this is due to integers taking up much less space than strings
+#       The ; at the end of a command tells SQL that I am going to have a few different commands
+#       INSERT INTO Album (title, artist_id) VALUES ("Who Made Who", 2)
+# 			The foreign keys needs to be put in -- easy for the code to figure this out, harder for the human
+# 	"Replication is OK as long as it is numbers"
+# 		Over-riding objective is to not replicate text strings
+# 		The less replication of strings, the faster the table will run
+# 		Goal is to reduce the amount of data that needs to be scanned during operations
+#       (plus, indices to speed things up even further)
+#
+# Lastly, the goal is to piece everything back together - reconstructing with JOIN
+# 	The relational database can read through the web of information very quickly
+# 		Often, when you want to retrieve/view some data, it comes from many tables linked by foreign keys
+# 		Data tends to scale - make sure to plan for that in advance
+# 	The JOIN operation says that we are connecting tables ON certain key(s)
+# 		SELECT Album.title, Artist.name FROM Album JOIN Artist ON Album.Artist_id = Artist.id
+# 			Generally, the ON and WHERE clauses will work the same on the JOIN operator
+# 		If you skipped the ON clause, then you will get the full JOIN (all possible combinations of rows)
+# 	Can have multiple JOIN all at the same time
+# 		SELECT Track.title, Artist.name, Album.title, Genre.name FROM Track JOIN Genre JOIN Album JOIN Artist
+#           ON Track.genre_id=Genre.id AND Track.Album_id=Album.id AND Album.artist_id = Artis.id
+#
+# There is a nice trick available when having set up a variable as UNIQUE in the SQL
+#   INSERT OR IGNORE INTO  # Will INSERT if it does not exist or IGNORE if the INSERT would make a duplicate
+#   INSERT OR REPLACE INTO  # Same idea, with the row either being created, or updated if it already exists
+# In general, it is beneficial to write long single-line SQL queries when possible, rather than splitting them up
+#
+# Example assignment code
+#
+
+
+import xml.etree.ElementTree as ET
+import sqlite3
+
+conSQLFile = sqlite3.connect('_notuse_BP004v002.sqlite')
+myCursor = conSQLFile.cursor()
+
+# Note that executescript() is used to send multiple lines to SQL at the same time
+myCursor.executescript('''
+
+DROP TABLE IF EXISTS Artist;
+DROP TABLE IF EXISTS Genre;
+DROP TABLE IF EXISTS Album;
+DROP TABLE IF EXISTS Track;
+
+CREATE TABLE Artist (
+    id  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+    name    TEXT UNIQUE
+);
+
+CREATE TABLE Genre (
+    id  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+    name    TEXT UNIQUE
+);
+
+CREATE TABLE Album (
+    id  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+    artist_id  INTEGER,
+    title   TEXT UNIQUE
+);
+
+CREATE TABLE Track (
+    id  INTEGER NOT NULL PRIMARY KEY
+        AUTOINCREMENT UNIQUE,
+    title TEXT  UNIQUE,
+    album_id  INTEGER,
+    genre_id  INTEGER,
+    len INTEGER, rating INTEGER, count INTEGER
+);
+
+''')
+
+fname = raw_input('Enter file name: ')
+if (len(fname) < 1):
+    fname = 'Library.xml'
+
+
+def lookup(xmlString, searchTerm):
+    found = False
+    for child in xmlString:
+        # Rather klugey - found gets set to True below, and then the VERY NEXT item is returned, ending the lookup
+        if found:
+            return child.text
+
+        # Rather klugey - this line will find a "key" tag that matches to searchTerm but NOT return it
+        if child.tag == 'key' and child.text == searchTerm:
+            found = True
+
+    # If nothing has been found, return None
+    return None
+
+
+# Now, read the XML that is in the passed file
+xmlData = ET.parse(fname)
+trackData = xmlData.findall('dict/dict/dict')
+print 'Dict count:', len(trackData)   # Dict count: 404
+
+# Now, take the relevant data and populate the key tables
+for entry in trackData:
+
+    if (lookup(entry, 'Track ID') is None):
+        continue
+
+    # Artist will require name, stored as "Artist"
+    artistName = lookup(entry, 'Artist')
+
+    # Genre will require name, stored as "Genre"
+    genreName = lookup(entry, 'Genre')
+
+    # Album will require title, stored as "Album"
+    albumTitle = lookup(entry, 'Album')
+
+    # Track requires title stored as "Name", len stored as "Total Time", rating stored as "Rating", and count stored as "Play Count"
+    trackName = lookup(entry, 'Name')
+    trackLen = lookup(entry, 'Total Time')
+    trackRating = lookup(entry, 'Rating')
+    trackCount = lookup(entry, 'Play Count')
+
+    # Only include items that have full proper entries for the database
+    if artistName is None or genreName is None or albumTitle is None or trackName is None:
+        continue
+
+    # print name, artist, album, count, rating, length
+
+    # Update the Artist table, including fetching the artist_id
+    myCursor.execute('''INSERT OR IGNORE INTO Artist (name)
+        VALUES ( ? )''', (artistName,))
+    myCursor.execute('SELECT id FROM Artist WHERE name = ? ', (artistName,))
+    artist_id = myCursor.fetchone()[0]
+
+    # Update the Genre table, including fetching the genre_id
+    myCursor.execute('''INSERT OR IGNORE INTO Genre (name)
+        VALUES ( ? )''', (genreName,))
+    myCursor.execute('SELECT id FROM Genre WHERE name = ? ', (genreName,))
+    genre_id = myCursor.fetchone()[0]
+
+    # Update the Album table, including fetching the album_id
+    myCursor.execute('''INSERT OR IGNORE INTO Album (title, artist_id)
+        VALUES ( ?, ? )''', (albumTitle, artist_id))
+    myCursor.execute('SELECT id FROM Album WHERE title = ? ', (albumTitle,))
+    album_id = myCursor.fetchone()[0]
+
+    # Update the Track table
+    myCursor.execute('''INSERT OR REPLACE INTO Track
+        (title, album_id, genre_id, len, rating, count)
+        VALUES ( ?, ?, ?, ?, ?, ? )''',
+                     (trackName, album_id, genre_id, trackLen, trackRating, trackCount))
+
+# Commit the database
+conSQLFile.commit()
+

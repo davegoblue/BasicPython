@@ -329,3 +329,116 @@ for entry in trackData:
 # Commit the database
 conSQLFile.commit()
 
+#
+# Week 04 - Many to Many in SQL
+# There can be many students per course AND ALSO many course per student
+# The techniques from the previous week need to be modified to properly handle this
+# The previous track to album is a one-to-many relationship (there are many tracks per album; only one album per track)
+# 	Often, a "crows foot" is used in the data modeling to suggest the "many" component of the relationship
+# 	For example, with biological mother to child, you would link by having a "crows foot" on the children,
+#   since each mother can have many children
+# Suppose that there is a many-to-many relationship using books and authors;
+# an author may write several books, and a book may have several authors
+# 	One common solution is to add a "connection table" (has other names, e.g., "junction table" or "member table")
+#   with two foreign keys
+#	Books is unique by book
+#	Authors is unique by author
+#	Connection table is unique by book-author ("there is usually no separate primary key;
+#   the combination of the book/author could be considered the primary key")
+#		Books is one-to-many to authors in Connection
+#		Authors is one-to-many to books in Connection
+#	Relationship has become two versions of the many-to-one
+#		Connection table has two foreign keys, and no primary key
+# Gives an example of the implementation
+#	User: ID*, Name, email
+#	Course: ID*, Title
+#	Member: User ID, Course ID, Role (teacher, student, etc.) . . .
+#           Final line syntax is "PRIMARY KEY (user_id, course_id)"
+# ORDER BY var1, var2 DESC, var3
+#	This would be the equivalent in R of A[order(A$var1, -A$var2, A$var3)]
+# Overwhelmingly, the reasons for doing all of this is speed
+# 	Once your data becomes large enough, this becomes a necessity!
+#
+# Many to Many Roster Demonstration
+#	Back to the decomposition of a many-to-many in to two separate many-to-one relationships
+#	INSERT OR IGNORE
+#		The "OR IGNORE" means "do not do this if it would cause an error;
+#       since we required uniqueness, the error would be a duplicate"
+#		In essence, this means it will create a primary key and INSERT the first time it sees something,
+#       and will ignore it otherwise
+#
+
+# This assignment is to manage the many-to-many relationship
+# There should be two unique primary-key tables, and a junction table including role
+# Each primary-key table should be one-to-many to the junction table
+# Code adapted from the Dr. Chuck starting point (roster.py)
+
+import json
+import sqlite3
+
+mySQLConn = sqlite3.connect('_notuse_BP004v003.sqlite')
+myCursor = mySQLConn.cursor()
+
+# Create the appropriate tables (delete them if they already exist)
+myCursor.executescript('''
+DROP TABLE IF EXISTS User;
+DROP TABLE IF EXISTS Member;
+DROP TABLE IF EXISTS Course;
+
+CREATE TABLE User (
+    id     INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+    name   TEXT UNIQUE
+);
+
+CREATE TABLE Course (
+    id     INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+    title  TEXT UNIQUE
+);
+
+CREATE TABLE Member (
+    user_id     INTEGER,
+    course_id   INTEGER,
+    role        INTEGER,
+    PRIMARY KEY (user_id, course_id)
+)
+''')
+
+# Default to using roster_data.json, but allow flexibility as and when needed
+fname = raw_input('Enter file name: ')
+if (len(fname) < 1):
+    fname = 'roster_data.json'
+
+# File is formatted as a JSON list
+#   [ "Charley", "si110", 1 ],
+#   [ "Mea", "si110", 0 ],
+
+userData = open(fname).read()
+json_data = json.loads(userData)
+
+# Read through each line of JSON, extracting user name, course title, and user role
+for entry in json_data:
+    userName = entry[0]
+    courseTitle = entry[1]
+    userRole = entry[2]
+
+    # print userName, courseTitle, userRole
+
+    # Put userName in to table User (if not yet there), and extract the associated primary key
+    myCursor.execute('''INSERT OR IGNORE INTO User (name)
+        VALUES ( ? )''', (userName,))
+    myCursor.execute('SELECT id FROM User WHERE name = ? ', (userName,))
+    user_id = myCursor.fetchone()[0]
+
+    # Put courseTitle in to table Course (if not yet there), and extract the associated primary key
+    myCursor.execute('''INSERT OR IGNORE INTO Course (title)
+        VALUES ( ? )''', (courseTitle,))
+    myCursor.execute('SELECT id FROM Course WHERE title = ? ', (courseTitle,))
+    course_id = myCursor.fetchone()[0]
+
+    # Put user_id, course_id, and userRole in to table Member
+    myCursor.execute('''INSERT OR REPLACE INTO Member
+        (user_id, course_id, role) VALUES ( ?, ?, ? )''',
+                     (user_id, course_id, userRole))
+
+# Commit (write everything to disk)
+mySQLConn.commit()

@@ -442,3 +442,190 @@ for entry in json_data:
 
 # Commit (write everything to disk)
 mySQLConn.commit()
+
+#
+# Visualization - Geocoding
+# Geocoding - multiple steps process
+# 	Data Source -> Gather to Raw DB -> Clean/Process (perhaps to Clean DB) -> Visualize / Analyze
+# 		Goal is to let the Gather to Raw DB run independently (it can be slow, buggy, etc.)
+# 		Once the data is in the Raw DB, the process is generally much smoother
+# 	There are many data mining technologies
+# 		Hadoop (Apache)
+# 		Spark (Apache)
+#		Redshift (Amazon)
+# 		Pentaho
+# 	This lecture is just about a very limited subset of data mining - "personal data mining"
+# 		The goal is to become a better programmer, not a data mining expert
+# 	Goal will be to talk with Google's geocoding API
+# 		Google Maps from user data
+# 		Uses the Google Geodata API
+# 		Caches data in a database to avoid rate limiting and allow restarting
+#		Visualized in a browser using Google Maps API
+#		Dr Chuck plans to give his own API for this, to avoid having people hit Google API endlessly
+# 	Two primary programs
+#		geoload.py - takes the Google API and the locations data and creates geodata.sqlite
+#		geodump.py - manipulates geodata.sqlite data to create the where.js (JSON file) for mapping
+#
+#
+# Page Rank and Web Searching - simulate the Google page rank algorithm
+# 	The page rank algorithm values links, and especially incoming links from more valuable pages
+# 		Step 1: Web Crawling - Write a simple web crawler
+# 		Step 2: Index Building - Compute a simple version of the page rank algorithm
+# 		Step 3: Searching (we will instead visualize the resulting network for this example)
+# 	Web Crawler goes to a page, finds all of its links, goes to those pages, etc.
+# 		BeautifulSoup (or other programs) may be used to help fix/read "broken" html
+# 		Further, might put the pages we have found in to a database
+# 	For serious web-crawling, some business rules exist
+# 		Selection policy (which pages to download)
+# 		Re-visit policy (when to check for changes to the pages)
+# 		Politeness policy (avoid overloading websites)
+#		Parallelization policy (distributed web crawlers)
+# 	There is often a robots.txt file for communication with web crawlers
+# 		Informal and voluntary standards
+# 		Sometimes people make "spider traps" to catch "bad" spiders
+# 	Indexing is the collecting, parsing, and storing in a manner that enables very fast results
+# 		Looking for the useful meaning inside the data
+# 	The queue actually exists inside the database
+# 		Web <-> spider.py <-> spider.sqlite
+# 			Goes to the first page, stores all of its links in DB,
+#           uses DB ordering as the queue for the next page to search
+# 			At the beginning, this code would grow the DB very, very quickly at the beginning!
+# 		The sprank.py program reads the pages and updates the page ranks
+# 			sprank.py <-> spider.sqlite
+# 		The spreset.py process returns everything to defaults so that you can start over
+# 		The spdump.py prints out the current page list and associated ranks
+# 			spider.sqlite -> spdump.py
+# 		The spjson.py dumps out some JSON for visualizing the linkages
+#       (visualization is done by JaveScript which is the .js)
+# 			spider.sqlite -> spjson.py -> force.js -> visualization
+#
+# Gmane - Mailing Lists example (gmane.org archives web mailing lists)
+# 	General process
+# 		Step 1: Crawl the archive of a mailing list
+# 		Step 2: Do some analysis/cleanup
+# 		Step 3: Visualize data as word cloud and lines
+# 	WARNING: This can be a ton of data!
+# 		Do not just point at gmane.org and let it run (>1 GB)
+# 		There is no rate limiting; do not choke your bandwidth or ruin access for everyone else
+# 		Dr Chuck has a non-rate-limited version available
+# 	This is a complicated work-flow
+# 		gmane.org -> gmane.py -> content.sqlite -> gmodel.py -> content.sqlite
+# 			"This raw data is a little messier than what we have been using;
+#           goal of the second table is to put things in third normal form"
+#           (this is what gmodel.py will do)
+#
+#           Cleaning is not done during gmane.py to 1) keep gmane.py simple, and
+#           2) ensure we really get a raw copy of the data
+#
+# 		content.sqlite -> gline.py -> gline.js -> line graphs
+# 		content.sqlite -> gword.py -> gword.pj -> word cloud
+# 		content.sqlite -> gbasic.py -> dump of top participants
+#	Three different examples of data-mining
+#
+# Back to the geocoding example from above
+# 	The command buffer(address) will revert address to plain text (what we want) rather than unicode (what we do not)
+# 	The command pass means (more or less) continue along, used inside the except: as the sole statement
+# 	Generally a good idea to print the data and then quit if something goes wrong in one of the functions
+#
+#
+
+
+import urllib
+import sqlite3
+import json
+import time
+import codecs
+
+
+serviceurl = "http://maps.googleapis.com/maps/api/geocode/json?"
+scontext = None
+
+conn = sqlite3.connect('_notuse_BP004v004.sqlite')
+cur = conn.cursor()
+
+cur.execute('''
+CREATE TABLE IF NOT EXISTS Locations (address TEXT, geodata TEXT)''')
+
+fh = open("where.data")
+count = 0
+for line in fh:
+    if count > 200 : break
+    address = line.strip()
+    print ''
+    cur.execute("SELECT geodata FROM Locations WHERE address= ?", (buffer(address), ))
+
+    try:
+        data = cur.fetchone()[0]
+        print "Found in database ",address
+        continue
+    except:
+        pass
+
+    print 'Resolving', address
+    url = serviceurl + urllib.urlencode({"sensor":"false", "address": address})
+    print 'Retrieving', url
+    uh = urllib.urlopen(url, context=scontext)
+    data = uh.read()
+    print 'Retrieved',len(data),'characters',data[:20].replace('\n',' ')
+    count = count + 1
+    try:
+        js = json.loads(str(data))
+        # print js  # We print in case unicode causes an error
+    except:
+        continue
+
+    if 'status' not in js or (js['status'] != 'OK' and js['status'] != 'ZERO_RESULTS') :
+        print '==== Failure To Retrieve ===='
+        print data
+        break
+
+    cur.execute('''INSERT INTO Locations (address, geodata)
+            VALUES ( ?, ? )''', ( buffer(address),buffer(data) ) )
+    conn.commit()
+    time.sleep(1)
+
+fh.close()
+cur.close()
+conn.close()
+
+
+# Next we will pretty the data for viewing
+
+
+conn = sqlite3.connect('_notuse_BP004v004.sqlite')
+cur = conn.cursor()
+
+cur.execute('SELECT * FROM Locations')
+fhand = codecs.open('where.js','w', "utf-8")
+fhand.write("myData = [\n")
+count = 0
+for row in cur :
+    time.sleep(0.25)  # Have a sleep before each step (for screenshot)
+    data = str(row[1])
+    try: js = json.loads(str(data))
+    except: continue
+
+    if not('status' in js and js['status'] == 'OK') : continue
+
+    lat = js["results"][0]["geometry"]["location"]["lat"]
+    lng = js["results"][0]["geometry"]["location"]["lng"]
+    if lat == 0 or lng == 0 : continue
+    where = js['results'][0]['formatted_address']
+    where = where.replace("'","")
+    try :
+        print where, lat, lng
+
+        count = count + 1
+        if count > 1 : fhand.write(",\n")
+        output = "["+str(lat)+","+str(lng)+", '"+where+"']"
+        fhand.write(output)
+    except:
+        continue
+
+fhand.write("\n];\n")
+cur.close()
+fhand.close()
+print count, "records written to where.js"
+print "Open where.html to view the data in a browser"
+
+
